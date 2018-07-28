@@ -69,7 +69,7 @@ void* pcap_replay(void* argv) {
                 *((uint16_t*)(tcp_header + 18)) = htons(packet_count);
                 gettimeofday(&start_time_record[packet_count], NULL);
                 packet_count += 1;
-                if (packet_count % 100 == 0) {
+                if (packet_count % 1000 == 0) {
                     fprintf(
                         stdout, 
                         "EELC-Replay: %d packets(used for "
