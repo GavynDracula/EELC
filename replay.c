@@ -53,31 +53,31 @@ void* pcap_replay(void* argv) {
                 *((uint16_t*)(ip_header + 10)) = 0;
                 sscanf(
                     LOCAL_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-                    eth_header->ether_shost, 
-                    eth_header->ether_shost + 1, 
-                    eth_header->ether_shost + 2, 
-                    eth_header->ether_shost + 3, 
+                    eth_header->ether_shost + 5, 
                     eth_header->ether_shost + 4, 
-                    eth_header->ether_shost + 5
+                    eth_header->ether_shost + 3, 
+                    eth_header->ether_shost + 2, 
+                    eth_header->ether_shost + 1, 
+                    eth_header->ether_shost + 0
                 );
-                fprintf(
-                    stdout, 
-                    "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx\n", 
-                    eth_header->ether_shost[0], 
-                    eth_header->ether_shost[1], 
-                    eth_header->ether_shost[2], 
-                    eth_header->ether_shost[3], 
-                    eth_header->ether_shost[4], 
-                    eth_header->ether_shost[5]
-                );
+                // fprintf(
+                    // stdout, 
+                    // "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx\n", 
+                    // eth_header->ether_shost[0], 
+                    // eth_header->ether_shost[1], 
+                    // eth_header->ether_shost[2], 
+                    // eth_header->ether_shost[3], 
+                    // eth_header->ether_shost[4], 
+                    // eth_header->ether_shost[5]
+                // );
                 sscanf(
                     TARGET_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-                    eth_header->ether_dhost, 
-                    eth_header->ether_dhost + 1, 
-                    eth_header->ether_dhost + 2, 
-                    eth_header->ether_dhost + 3, 
+                    eth_header->ether_dhost + 5, 
                     eth_header->ether_dhost + 4, 
-                    eth_header->ether_dhost + 5
+                    eth_header->ether_dhost + 3, 
+                    eth_header->ether_dhost + 2, 
+                    eth_header->ether_dhost + 1, 
+                    eth_header->ether_dhost + 0
                 );
                 *((uint16_t*)(ip_header + 10)) = 
                     htons(ip_checksum((void*)ip_header, ip_header_length));
