@@ -68,7 +68,7 @@ void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* pac
                     stdout, 
                     "EELC-Receive: %d packets(used for "
                     "latency computing) has been received\n", 
-                    packet_count
+                    packet_count + 1
                 );
             }
             if (packet_count == TIME_RECORD_SIZE - 1) {

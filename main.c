@@ -14,6 +14,7 @@ int main(void) {
     pthread_t receive_thread;
     struct timeval start_time;
     struct timeval end_time;
+    FILE* fp;
 
     ret = pthread_create(
         &replay_thread, NULL, &pcap_replay, (void*)start_time_record
@@ -40,12 +41,20 @@ int main(void) {
         exit(2);
     }
 
+    if ((fp = fopen(LATENCY_FILE, "w")) == NULL) {
+        fprintf(stderr, "Erro: EELC-Main: Can't open file %s\n", LATENCY_FILE);
+        exit(3);
+    }
+
     for (int i = 0; i < TIME_RECORD_SIZE; i++) {
         start_time = start_time_record[i];
         end_time = end_time_record[i];
         latency_record[i] = (end_time.tv_sec - start_time.tv_sec) * 1000000;
         latency_record[i] += end_time.tv_usec - start_time.tv_usec;
+        fprintf(fp, "%d %lu\n", i, latency_record[i]);
     }
+
+    fclose(fp);
 
     return 0;
 }
