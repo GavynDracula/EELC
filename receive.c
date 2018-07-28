@@ -41,8 +41,8 @@ void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* pac
     eth_header = (struct ether_header*)packet;
     sscanf(
         LOCAL_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-        local_mac + 0, local_mac + 1, local_mac + 2,
-        local_mac + 3, local_mac + 4, local_mac + 5
+        local_mac + 5, local_mac + 4, local_mac + 3,
+        local_mac + 2, local_mac + 1, local_mac + 0
     );
     for (int i = 0; i < 6; i++) {
         if (eth_header->ether_dhost[i] != local_mac[i]) {
@@ -63,6 +63,14 @@ void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* pac
             tcp_header = ip_header + ip_header_length;
             packet_count = ntohs(*((uint16_t*)(tcp_header + 18)));
             gettimeofday(&end_time_record[packet_count], NULL);
+            if (packet_count % 1000 == 0) {
+                fprintf(
+                    stdout, 
+                    "EELC-Receive: %d packets(used for "
+                    "latency computing) has been received\n", 
+                    packet_count
+                );
+            }
             if (packet_count == TIME_RECORD_SIZE - 1) {
                 fprintf(
                     stdout, 
