@@ -60,6 +60,16 @@ void* pcap_replay(void* argv) {
                     eth_header->ether_shost + 4, 
                     eth_header->ether_shost + 5
                 );
+                fprintf(
+                    stdout, 
+                    "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", 
+                    eth_header->ether_shost[0], 
+                    eth_header->ether_shost[1], 
+                    eth_header->ether_shost[2], 
+                    eth_header->ether_shost[3], 
+                    eth_header->ether_shost[4], 
+                    eth_header->ether_shost[5]
+                );
                 sscanf(
                     TARGET_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
                     eth_header->ether_dhost, 
