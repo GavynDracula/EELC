@@ -37,24 +37,6 @@ void* pcap_replay(void* argv) {
     while (packet != NULL && packet_count < TIME_RECORD_SIZE) {
         struct ether_header* eth_header;
         eth_header = (struct ether_header*)packet;
-        // sscanf(
-            // LOCAL_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-            // eth_header->ether_shost, 
-            // eth_header->ether_shost + 1, 
-            // eth_header->ether_shost + 2, 
-            // eth_header->ether_shost + 3, 
-            // eth_header->ether_shost + 4, 
-            // eth_header->ether_shost + 5
-        // );
-        // sscanf(
-            // TARGET_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-            // eth_header->ether_dhost, 
-            // eth_header->ether_dhost + 1, 
-            // eth_header->ether_dhost + 2, 
-            // eth_header->ether_dhost + 3, 
-            // eth_header->ether_dhost + 4, 
-            // eth_header->ether_dhost + 5
-        // );
         if (ntohs(eth_header->ether_type) == ETHERTYPE_IP) {
             const u_char* ip_header;
             u_char protocol;
@@ -67,6 +49,28 @@ void* pcap_replay(void* argv) {
                 ip_header_length = ip_header_length * 4;
                 tcp_header = ip_header + ip_header_length;
                 *((uint16_t*)(tcp_header + 18)) = htons(packet_count);
+                /* Modify Ethernet Address */
+                *((uint16_t*)(ip_header + 10)) = 0;
+                sscanf(
+                    LOCAL_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+                    eth_header->ether_shost, 
+                    eth_header->ether_shost + 1, 
+                    eth_header->ether_shost + 2, 
+                    eth_header->ether_shost + 3, 
+                    eth_header->ether_shost + 4, 
+                    eth_header->ether_shost + 5
+                );
+                sscanf(
+                    TARGET_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+                    eth_header->ether_dhost, 
+                    eth_header->ether_dhost + 1, 
+                    eth_header->ether_dhost + 2, 
+                    eth_header->ether_dhost + 3, 
+                    eth_header->ether_dhost + 4, 
+                    eth_header->ether_dhost + 5
+                );
+                *((uint16_t*)(ip_header + 10)) = 
+                    ip_checksum((void*)ip_header, ip_header_length);
                 gettimeofday(&start_time_record[packet_count], NULL);
                 packet_count += 1;
                 if (packet_count % 1000 == 0) {
@@ -79,13 +83,13 @@ void* pcap_replay(void* argv) {
                 }
             }
         }
-        usleep(SEND_DELAY_US);
         if (pcap_sendpacket(replay_nic, packet, pkthdr.caplen) != 0) {
             fprintf(
                 stderr, 
                 "Error: EELC-Replay: pcap_sendpacket(): send packet error\n"
             );
         }
+        usleep(SEND_DELAY_US);
         packet = pcap_next(pcap_file, &pkthdr);
     }
 
@@ -97,3 +101,54 @@ void* pcap_replay(void* argv) {
     return NULL;
 }
 
+uint16_t ip_checksum(void* vdata,size_t length) {
+    // Cast the data pointer to one that can be indexed.
+    char* data=(char*)vdata;
+
+    // Initialise the accumulator.
+    uint64_t acc=0xffff;
+
+    // Handle any partial block at the start of the data.
+    unsigned int offset=((uintptr_t)data)&3;
+    if (offset) {
+        size_t count=4-offset;
+        if (count>length) count=length;
+        uint32_t word=0;
+        memcpy(offset+(char*)&word,data,count);
+        acc+=ntohl(word);
+        data+=count;
+        length-=count;
+    }
+
+    // Handle any complete 32-bit blocks.
+    char* data_end=data+(length&~3);
+    while (data!=data_end) {
+        uint32_t word;
+        memcpy(&word,data,4);
+        acc+=ntohl(word);
+        data+=4;
+    }
+    length&=3;
+
+    // Handle any partial block at the end of the data.
+    if (length) {
+        uint32_t word=0;
+        memcpy(&word,data,length);
+        acc+=ntohl(word);
+    }
+
+    // Handle deferred carries.
+    acc=(acc&0xffffffff)+(acc>>32);
+    while (acc>>16) {
+        acc=(acc&0xffff)+(acc>>16);
+    }
+
+    // If the data began at an odd byte address
+    // then reverse the byte order to compensate.
+    if (offset&1) {
+        acc=((acc&0xff00)>>8)|((acc&0x00ff)<<8);
+    }
+
+    // Return the checksum in network byte order.
+    return htons(~acc);
+}

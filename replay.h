@@ -9,6 +9,7 @@
 #define _REPLAY_H
 
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <pcap.h>
 #include <netinet/in.h>
@@ -38,5 +39,6 @@
 // } replay_arg;
 
 void* pcap_replay(void* argv);
+uint16_t ip_checksum(void* vdata,size_t length);
 
 #endif
