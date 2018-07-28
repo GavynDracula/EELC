@@ -41,6 +41,9 @@ int main(void) {
         exit(2);
     }
 
+    fprintf(stdout, "EELC-Main: Replay and Receive threads run over\n");
+    fprintf(stdout, "EELC-Main: Ready to compute latency and write to file\n");
+
     if ((fp = fopen(LATENCY_FILE, "w")) == NULL) {
         fprintf(stderr, "Erro: EELC-Main: Can't open file %s\n", LATENCY_FILE);
         exit(3);
