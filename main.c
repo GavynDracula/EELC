@@ -19,21 +19,25 @@ int main(void) {
         &replay_thread, NULL, &pcap_replay, (void*)start_time_record
     );
     if (ret != 0) {
-        fprintf(stderr, "Error: EELC-Main: can't create Replay thread!");
+        fprintf(stderr, "Error: EELC-Main: Can't create Replay thread!");
+        exit(1);
     }
 
     ret = pthread_create(
         &receive_thread, NULL, &packets_receive, (void*)end_time_record
     );
     if (ret != 0) {
-        fprintf(stderr, "Error: EELC-Main: can't create Reiceive thread!");
+        fprintf(stderr, "Error: EELC-Main: Can't create Reiceive thread!");
+        exit(1);
     }
 
     if (pthread_join(replay_thread, &status) != 0) {
-        fprintf(stderr, "Error: EELC-Main: can't end Replay thread!");
+        fprintf(stderr, "Error: EELC-Main: Can't end Replay thread!");
+        exit(2);
     }
     if (pthread_join(receive_thread, &status) != 0) {
-        fprintf(stderr, "Error: EELC-Main: can't end Receive thread!");
+        fprintf(stderr, "Error: EELC-Main: Can't end Receive thread!");
+        exit(2);
     }
 
     for (int i = 0; i < TIME_RECORD_SIZE; i++) {

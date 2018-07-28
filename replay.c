@@ -18,38 +18,43 @@ void* pcap_replay(void* argv) {
     // struct replay_arg* args = (struct replay_arg*)argv;
     struct timeval* start_time_record = (struct timeval*)argv;
 
+    fprintf(stdout, "EELC-Replay: Thread is running...\n");
+
     replay_nic = pcap_open_live(REPLAY_NIC, PKT_MAX_SIZE, REPLAY_PROMISC, TO_MS, err_buf);
     if (replay_nic == NULL) {
         fprintf(stderr, "Error: EELC-Replay: pcap_open_live(): %s\n", err_buf);
+        pthread_exit(NULL);
     }
 
     pcap_file = pcap_open_offline(PCAP_FILE, err_buf);
     if (pcap_file == NULL) {
         fprintf(stderr, "Error: EELC-Replay: pcap_open_offline(): %s\n", err_buf);
+        pthread_exit(NULL);
     }
 
     packet = pcap_next(pcap_file, &pkthdr);
+    fprintf(stdout, "EELC-Replay: Begin to replay packets\n");
     while (packet != NULL && packet_count < TIME_RECORD_SIZE) {
         struct ether_header* eth_header;
         eth_header = (struct ether_header*)packet;
         sscanf(
-                LOCAL_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-                eth_header->ether_shost, 
-                eth_header->ether_shost + 1, 
-                eth_header->ether_shost + 2, 
-                eth_header->ether_shost + 3, 
-                eth_header->ether_shost + 4, 
-                eth_header->ether_shost + 5
-              );
+            LOCAL_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+            eth_header->ether_shost, 
+            eth_header->ether_shost + 1, 
+            eth_header->ether_shost + 2, 
+            eth_header->ether_shost + 3, 
+            eth_header->ether_shost + 4, 
+            eth_header->ether_shost + 5
+        );
         sscanf(
-                TARGET_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-                eth_header->ether_dhost, 
-                eth_header->ether_dhost + 1, 
-                eth_header->ether_dhost + 2, 
-                eth_header->ether_dhost + 3, 
-                eth_header->ether_dhost + 4, 
-                eth_header->ether_dhost + 5
-              );
+            TARGET_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+            eth_header->ether_dhost, 
+            eth_header->ether_dhost + 1, 
+            eth_header->ether_dhost + 2, 
+            eth_header->ether_dhost + 3, 
+            eth_header->ether_dhost + 4, 
+            eth_header->ether_dhost + 5
+        );
         if (ntohs(eth_header->ether_type) == ETHERTYPE_IP) {
             const u_char* ip_header;
             u_char protocol;
@@ -64,6 +69,14 @@ void* pcap_replay(void* argv) {
                 *((uint16_t*)(tcp_header + 18)) = htons(packet_count);
                 gettimeofday(&start_time_record[packet_count], NULL);
                 packet_count += 1;
+                if (packet_count % 100 == 0) {
+                    fprintf(
+                        stdout, 
+                        "EELC-Replay: %d packets(used for "
+                        "latency computing) has been sent\n", 
+                        packet_count
+                    );
+                }
             }
         }
         usleep(SEND_DELAY_US);
@@ -75,6 +88,8 @@ void* pcap_replay(void* argv) {
         }
         packet = pcap_next(pcap_file, &pkthdr);
     }
+
+    fprintf(stdout, "EELC-Replay: Packets sent over. Ready to exit thread.\n");
 
     pcap_close(replay_nic);
     pcap_close(pcap_file);

@@ -27,6 +27,8 @@
 
 #define LOCAL_MAC "68:91:d0:61:12:3a"
 
+#define TIME_RECORD_SIZE 10000
+
 void* packets_receive(void* argv);
 void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* packet);
 

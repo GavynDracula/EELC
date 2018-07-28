@@ -11,14 +11,22 @@ void* packets_receive(void* argv) {
     char err_buf[PCAP_ERRBUF_SIZE];
     pcap_t* receive_nic;
 
+    fprintf(stdout, "EELC-Receive: Thread is running...\n");
+
     receive_nic = pcap_open_live(
         RECEIVE_NIC, PKT_MAX_SIZE, RECEIVE_PROMISC, TO_MS, err_buf
     );
     if (receive_nic == NULL) {
         fprintf(stderr, "Error: EELC-Receive: pcap_open_live(): %s\n", err_buf);
+        pthread_exit(NULL);
     }
 
     pcap_loop(receive_nic, PACKET_NUM, get_packet, (u_char*)argv);
+
+    fprintf(
+        stdout, 
+        "EELC-Receive: Last packet is received. Ready to exit thread.\n"
+    );
 
     pcap_close(receive_nic);
 
@@ -55,6 +63,14 @@ void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* pac
             tcp_header = ip_header + ip_header_length;
             packet_count = ntohs(*((uint16_t*)(tcp_header + 18)));
             gettimeofday(&end_time_record[packet_count], NULL);
+            if (packet_count == TIME_RECORD_SIZE - 1) {
+                fprintf(
+                    stdout, 
+                    "EELC-Receive: Last packet is received."
+                    " Ready to exit thread.\n"
+                );
+                pthread_exit(NULL);
+            }
         }
     }
     return;
