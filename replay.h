@@ -25,7 +25,7 @@
 #define REPLAY_PROMISC 1
 #define TO_MS 1000
 
-#define SEND_DELAY_US 1000
+#define SEND_DELAY_US 10000
 
 #define LOCAL_MAC "68:91:d0:61:12:3a"
 #define TARGET_MAC "68:91:d0:61:b4:c4"

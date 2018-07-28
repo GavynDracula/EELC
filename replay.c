@@ -37,24 +37,24 @@ void* pcap_replay(void* argv) {
     while (packet != NULL && packet_count < TIME_RECORD_SIZE) {
         struct ether_header* eth_header;
         eth_header = (struct ether_header*)packet;
-        sscanf(
-            LOCAL_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-            eth_header->ether_shost, 
-            eth_header->ether_shost + 1, 
-            eth_header->ether_shost + 2, 
-            eth_header->ether_shost + 3, 
-            eth_header->ether_shost + 4, 
-            eth_header->ether_shost + 5
-        );
-        sscanf(
-            TARGET_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-            eth_header->ether_dhost, 
-            eth_header->ether_dhost + 1, 
-            eth_header->ether_dhost + 2, 
-            eth_header->ether_dhost + 3, 
-            eth_header->ether_dhost + 4, 
-            eth_header->ether_dhost + 5
-        );
+        // sscanf(
+            // LOCAL_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+            // eth_header->ether_shost, 
+            // eth_header->ether_shost + 1, 
+            // eth_header->ether_shost + 2, 
+            // eth_header->ether_shost + 3, 
+            // eth_header->ether_shost + 4, 
+            // eth_header->ether_shost + 5
+        // );
+        // sscanf(
+            // TARGET_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+            // eth_header->ether_dhost, 
+            // eth_header->ether_dhost + 1, 
+            // eth_header->ether_dhost + 2, 
+            // eth_header->ether_dhost + 3, 
+            // eth_header->ether_dhost + 4, 
+            // eth_header->ether_dhost + 5
+        // );
         if (ntohs(eth_header->ether_type) == ETHERTYPE_IP) {
             const u_char* ip_header;
             u_char protocol;
