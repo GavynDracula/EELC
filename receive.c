@@ -63,7 +63,7 @@ void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* pac
             tcp_header = ip_header + ip_header_length;
             packet_count = ntohs(*((uint16_t*)(tcp_header + 18)));
             gettimeofday(&end_time_record[packet_count], NULL);
-            if (packet_count % 1000 == 0) {
+            if (packet_count % 1000 == 999) {
                 fprintf(
                     stdout, 
                     "EELC-Receive: %d packets(used for "
