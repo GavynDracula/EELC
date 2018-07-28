@@ -70,7 +70,7 @@ void* pcap_replay(void* argv) {
                     eth_header->ether_dhost + 5
                 );
                 *((uint16_t*)(ip_header + 10)) = 
-                    ip_checksum((void*)ip_header, ip_header_length);
+                    htons(ip_checksum((void*)ip_header, ip_header_length));
                 gettimeofday(&start_time_record[packet_count], NULL);
                 packet_count += 1;
                 if (packet_count % 1000 == 0) {
