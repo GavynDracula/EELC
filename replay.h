@@ -28,8 +28,8 @@
 
 #define SEND_DELAY_US 10000
 
-#define LOCAL_MAC "68:91:d0:61:12:3a"
-#define TARGET_MAC "68:91:d0:61:b4:c4"
+#define LOCAL_MAC "68:91:d0:61:b4:c4"
+#define TARGET_MAC "68:91:d0:61:12:3a"
 
 #define TIME_RECORD_SIZE 10000
 
