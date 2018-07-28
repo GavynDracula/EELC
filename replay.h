@@ -22,7 +22,7 @@
 #define ETHER_HEADER_LENGTH 14
 
 #define PKT_MAX_SIZE 65535
-#define REPLAY_PROMISC 0
+#define REPLAY_PROMISC 1
 #define TO_MS 1000
 
 #define SEND_DELAY_US 1000
