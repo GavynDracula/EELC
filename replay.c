@@ -62,7 +62,7 @@ void* pcap_replay(void* argv) {
                 );
                 fprintf(
                     stdout, 
-                    "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", 
+                    "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx\n", 
                     eth_header->ether_shost[0], 
                     eth_header->ether_shost[1], 
                     eth_header->ether_shost[2], 
