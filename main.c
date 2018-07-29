@@ -75,11 +75,15 @@ int main(void) {
     for (int i = 0; i < TIME_RECORD_SIZE; i++) {
         start_time = start_time_record[i];
         end_time = end_time_record[i];
+        // fprintf(stdout, "EELC-Main: %d %lus\n", i, end_time.tv_sec - start_time.tv_sec);
+        // fprintf(stdout, "EELC-Main: %d %luns\n", i, end_time.tv_nsec - start_time.tv_nsec);
         // latency_record[i] = (end_time.tv_sec - start_time.tv_sec) * 1000000;
         // latency_record[i] += end_time.tv_usec - start_time.tv_usec;
         latency_record[i] = (end_time.tv_sec - start_time.tv_sec) * 1000000000;
         latency_record[i] += end_time.tv_nsec - start_time.tv_nsec;
-        fprintf(fp, "%d %lu\n", i, latency_record[i]);
+        fprintf(
+            fp, "%d %luus %luns\n", i, latency_record[i]/1000, latency_record[i]
+        );
     }
 
     fclose(fp);

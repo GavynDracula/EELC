@@ -13,11 +13,39 @@ void* packets_receive(void* argv) {
 
     fprintf(stdout, "EELC-Receive: Thread is running...\n");
 
-    receive_nic = pcap_open_live(
-        RECEIVE_NIC, PKT_MAX_SIZE, RECEIVE_PROMISC, TO_MS, err_buf
-    );
+    // receive_nic = pcap_open_live(
+        // RECEIVE_NIC, PKT_MAX_SIZE, RECEIVE_PROMISC, TO_MS, err_buf
+    // );
+    // if (receive_nic == NULL) {
+        // fprintf(stderr, "Error: EELC-Receive: pcap_open_live(): %s\n", err_buf);
+        // pthread_exit(NULL);
+    // }
+
+    receive_nic = pcap_create(RECEIVE_NIC, err_buf);
     if (receive_nic == NULL) {
-        fprintf(stderr, "Error: EELC-Receive: pcap_open_live(): %s\n", err_buf);
+        fprintf(stderr, "Error: EELC-Receive: pcap_create(): %s\n", err_buf);
+        pthread_exit(NULL);
+    }
+    if (pcap_set_promisc(receive_nic, RECEIVE_PROMISC) != 0) {
+        fprintf(stderr, "Error: EELC-Receive: pcap_set_promisc() fails\n");
+        pthread_exit(NULL);
+    }
+    if (pcap_set_snaplen(receive_nic, RECEIVE_SNAPLEN) != 0) {
+        fprintf(stderr, "Error: EELC-Receive: pcap_set_snaplen() fails\n");
+        pthread_exit(NULL);
+    }
+    if (pcap_set_timeout(receive_nic, RECEIVE_TO_MS) != 0) {
+        fprintf(stderr, "Error: EELC-Receive: pcap_set_timeout() fails\n");
+        pthread_exit(NULL);
+    }
+    if (pcap_set_immediate_mode(receive_nic, RECEIVE_IMMEDIATE) != 0) {
+        fprintf(
+            stderr, "Error: EELC-Receive: pcap_set_immediate_mode() fails\n"
+        );
+        pthread_exit(NULL);
+    }
+    if (pcap_activate(receive_nic) != 0) {
+        fprintf(stderr,"Error: EELC-Receive: pcap_activate() fails\n");
         pthread_exit(NULL);
     }
 

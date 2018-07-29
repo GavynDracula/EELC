@@ -21,9 +21,37 @@ void* pcap_replay(void* argv) {
 
     fprintf(stdout, "EELC-Replay: Thread is running...\n");
 
-    replay_nic = pcap_open_live(REPLAY_NIC, PKT_MAX_SIZE, REPLAY_PROMISC, TO_MS, err_buf);
+    // replay_nic = pcap_open_live(
+        // REPLAY_NIC, PKT_MAX_SIZE, REPLAY_PROMISC, TO_MS, err_buf
+    // );
+    // if (replay_nic == NULL) {
+        // fprintf(stderr, "Error: EELC-Replay: pcap_open_live(): %s\n", err_buf);
+        // pthread_exit(NULL);
+    // }
+
+    replay_nic = pcap_create(REPLAY_NIC, err_buf);
     if (replay_nic == NULL) {
-        fprintf(stderr, "Error: EELC-Replay: pcap_open_live(): %s\n", err_buf);
+        fprintf(stderr, "Error: EELC-Replay: pcap_create(): %s\n", err_buf);
+        pthread_exit(NULL);
+    }
+    if (pcap_set_promisc(replay_nic, REPLAY_PROMISC) != 0) {
+        fprintf(stderr, "Error: EELC-Replay: pcap_set_promisc() fails\n");
+        pthread_exit(NULL);
+    }
+    if (pcap_set_snaplen(replay_nic, REPLAY_SNAPLEN) != 0) {
+        fprintf(stderr, "Error: EELC-Replay: pcap_set_snaplen() fails\n");
+        pthread_exit(NULL);
+    }
+    if (pcap_set_timeout(replay_nic, REPLAY_TO_MS) != 0) {
+        fprintf(stderr, "Error: EELC-Replay: pcap_set_timeout() fails\n");
+        pthread_exit(NULL);
+    }
+    if (pcap_set_immediate_mode(replay_nic, REPLAY_IMMEDIATE) != 0) {
+        fprintf(stderr,"Error: EELC-Replay: pcap_set_immediate_mode() fails\n");
+        pthread_exit(NULL);
+    }
+    if (pcap_activate(replay_nic) != 0) {
+        fprintf(stderr,"Error: EELC-Replay: pcap_activate() fails\n");
         pthread_exit(NULL);
     }
 
@@ -95,10 +123,12 @@ void* pcap_replay(void* argv) {
                 }
             }
         }
-        if (pcap_sendpacket(replay_nic, packet, pkthdr.caplen) != 0) {
+        // if (pcap_sendpacket(replay_nic, packet, pkthdr.caplen) != 0) {
+        if (pcap_inject(replay_nic, packet, pkthdr.caplen) != 0) {
             fprintf(
                 stderr, 
-                "Error: EELC-Replay: pcap_sendpacket(): send packet error\n"
+                // "Error: EELC-Replay: pcap_sendpacket(): send packet error\n"
+                "Error: EELC-Replay: pcap_inject(): send packet error\n"
             );
         }
         usleep(SEND_DELAY_US);

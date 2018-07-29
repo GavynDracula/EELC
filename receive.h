@@ -19,11 +19,12 @@
 
 #define ETHER_HEADER_LENGTH 14
 
-#define PKT_MAX_SIZE 65535
+#define RECEIVE_SNAPLEN 2048
 #define RECEIVE_PROMISC 1
-#define TO_MS 1000
+#define RECEIVE_TO_MS 1000
+#define RECEIVE_IMMEDIATE 1
 
-#define PACKET_NUM 20000
+#define PACKET_NUM -1
 
 #define LOCAL_MAC "68:91:d0:61:b4:c4"
 
