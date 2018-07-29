@@ -8,6 +8,8 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>

@@ -12,6 +12,7 @@ int main(void) {
     void* status;
     pthread_t replay_thread;
     pthread_t receive_thread;
+    cpu_set_t set;
     struct timeval start_time;
     struct timeval end_time;
     FILE* fp;
@@ -31,6 +32,26 @@ int main(void) {
         fprintf(stderr, "Error: EELC-Main: Can't create Reiceive thread!");
         exit(1);
     }
+
+    CPU_ZERO(&set);
+    CPU_SET(4, &set);
+    if(pthread_setaffinity_np(pthread_self(), sizeof(set), &set) != 0) {
+        fprintf(stderr, "Error: EELC-Main: Can't set Main's cpu-affinity\n");
+        exit(1);
+    }
+    CPU_ZERO(&set);
+    CPU_SET(6, &set);
+    if(pthread_setaffinity_np(replay_thread, sizeof(set), &set) != 0) {
+        fprintf(stderr, "Error: EELC-Main: Can't set Replay's cpu-affinity\n");
+        exit(1);
+    }
+    CPU_ZERO(&set);
+    CPU_SET(8, &set);
+    if(pthread_setaffinity_np(receive_thread, sizeof(set), &set) != 0) {
+        fprintf(stderr, "Error: EELC-Main: Can't set Receive's cpu-affinity\n");
+        exit(1);
+    }
+
 
     if (pthread_join(replay_thread, &status) != 0) {
         fprintf(stderr, "Error: EELC-Main: Can't end Replay thread!");
