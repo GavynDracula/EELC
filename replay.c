@@ -16,7 +16,8 @@ void* pcap_replay(void* argv) {
     pcap_t* pcap_file;
     uint16_t packet_count = 0;
     // struct replay_arg* args = (struct replay_arg*)argv;
-    struct timeval* start_time_record = (struct timeval*)argv;
+    // struct timeval* start_time_record = (struct timeval*)argv;
+    struct timespec* start_time_record = (struct timespec*)argv;
 
     fprintf(stdout, "EELC-Replay: Thread is running...\n");
 
@@ -81,7 +82,8 @@ void* pcap_replay(void* argv) {
                 );
                 *((uint16_t*)(ip_header + 10)) = 
                     htons(ip_checksum((void*)ip_header, ip_header_length));
-                gettimeofday(&start_time_record[packet_count], NULL);
+                // gettimeofday(&start_time_record[packet_count], NULL);
+                clock_gettime(CLOCK_REALTIME, &start_time_record[packet_count]);
                 packet_count += 1;
                 if (packet_count % 1000 == 0) {
                     fprintf(

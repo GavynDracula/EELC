@@ -34,7 +34,8 @@ void* packets_receive(void* argv) {
 }
 
 void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* packet) {
-    struct timeval* end_time_record = (struct timeval*)arg;
+    // struct timeval* end_time_record = (struct timeval*)arg;
+    struct timespec* end_time_record = (struct timespec*)arg;
     struct ether_header* eth_header;
     u_char local_mac[6];
 
@@ -62,7 +63,8 @@ void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* pac
             ip_header_length = ip_header_length * 4;
             tcp_header = ip_header + ip_header_length;
             packet_count = ntohs(*((uint16_t*)(tcp_header + 18)));
-            gettimeofday(&end_time_record[packet_count], NULL);
+            // gettimeofday(&end_time_record[packet_count], NULL);
+            clock_gettime(CLOCK_REALTIME, &end_time_record[packet_count]);
             if (packet_count % 1000 == 999) {
                 fprintf(
                     stdout, 

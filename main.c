@@ -13,8 +13,10 @@ int main(void) {
     pthread_t replay_thread;
     pthread_t receive_thread;
     cpu_set_t set;
-    struct timeval start_time;
-    struct timeval end_time;
+    // struct timeval start_time;
+    // struct timeval end_time;
+    struct timespec start_time;
+    struct timespec end_time;
     FILE* fp;
 
     ret = pthread_create(
@@ -73,8 +75,10 @@ int main(void) {
     for (int i = 0; i < TIME_RECORD_SIZE; i++) {
         start_time = start_time_record[i];
         end_time = end_time_record[i];
-        latency_record[i] = (end_time.tv_sec - start_time.tv_sec) * 1000000;
-        latency_record[i] += end_time.tv_usec - start_time.tv_usec;
+        // latency_record[i] = (end_time.tv_sec - start_time.tv_sec) * 1000000;
+        // latency_record[i] += end_time.tv_usec - start_time.tv_usec;
+        latency_record[i] = (end_time.tv_sec - start_time.tv_sec) * 1000000000;
+        latency_record[i] += end_time.tv_nsec - start_time.tv_nsec;
         fprintf(fp, "%d %lu\n", i, latency_record[i]);
     }
 
