@@ -124,7 +124,7 @@ void* pcap_replay(void* argv) {
             }
         }
         // if (pcap_sendpacket(replay_nic, packet, pkthdr.caplen) != 0) {
-        if (pcap_inject(replay_nic, packet, pkthdr.caplen) != 0) {
+        if (pcap_inject(replay_nic, packet, pkthdr.caplen) == -1) {
             fprintf(
                 stderr, 
                 // "Error: EELC-Replay: pcap_sendpacket(): send packet error\n"
