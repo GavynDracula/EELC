@@ -1,2 +1,2 @@
-*.pcap
-eelc
+*/*.pcap
+*/eelc
