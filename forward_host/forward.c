@@ -11,7 +11,7 @@ void* packets_forward(void* argv) {
     char err_buf[PCAP_ERRBUF_SIZE];
     pcap_t* receive_nic;
     pcap_t* send_nic;
-    char** nic_group = (char **)argv;
+    char (*nic_group)[16] = argv;
 
     fprintf(stdout, "EELC-Forward: Thread is running...\n");
 
