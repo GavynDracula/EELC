@@ -13,7 +13,7 @@ void* packets_forward(void* argv) {
     pcap_t* send_nic;
     char** nic_group = (char **)argv;
 
-    fprintf(stdout, "EELC-Receive: Thread is running...\n");
+    fprintf(stdout, "EELC-Forward: Thread is running...\n");
 
     // receive_nic = pcap_open_live(
         // RECEIVE_NIC, PKT_MAX_SIZE, RECEIVE_PROMISC, TO_MS, err_buf
