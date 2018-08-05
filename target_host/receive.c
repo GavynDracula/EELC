@@ -61,23 +61,23 @@ void* packets_receive(void* argv) {
 void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* packet) {
     pcap_t* receive_nic = (pcap_t*)arg;
     struct ether_header* eth_header;
-    u_char local_mac[6];
+    u_char target_mac[6];
     int i;
 
     eth_header = (struct ether_header*)packet;
     sscanf(
-        LOCAL_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-        local_mac + 5, local_mac + 4, local_mac + 3,
-        local_mac + 2, local_mac + 1, local_mac + 0
+        TARGET_MAC, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+        target_mac + 5, target_mac + 4, target_mac + 3,
+        target_mac + 2, target_mac + 1, target_mac + 0
     );
     for (i = 0; i < 6; i++) {
-        if (eth_header->ether_dhost[i] != local_mac[i]) {
+        if (eth_header->ether_dhost[i] != target_mac[i]) {
             return;
         }
     }
     for (i = 0; i < 6; i++) {
         eth_header->ether_dhost[i] = eth_header->ether_shost[i];
-        eth_header->ether_shost[i] = local_mac[i];
+        eth_header->ether_shost[i] = target_mac[i];
     }
     if (pcap_inject(receive_nic, packet, pkthdr->caplen) == -1) {
         fprintf(
