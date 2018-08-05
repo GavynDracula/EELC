@@ -66,6 +66,7 @@ void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* pac
     struct timespec* end_time_record = (struct timespec*)arg;
     struct ether_header* eth_header;
     u_char local_mac[6];
+    int i;
 
     eth_header = (struct ether_header*)packet;
     sscanf(
@@ -73,7 +74,7 @@ void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* pac
         local_mac + 5, local_mac + 4, local_mac + 3,
         local_mac + 2, local_mac + 1, local_mac + 0
     );
-    for (int i = 0; i < 6; i++) {
+    for (i = 0; i < 6; i++) {
         if (eth_header->ether_dhost[i] != local_mac[i]) {
             return;
         }
