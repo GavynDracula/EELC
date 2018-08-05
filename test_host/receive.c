@@ -49,9 +49,12 @@ void* packets_receive(void* argv) {
         pthread_exit(NULL);
     }
 
-    pcap_loop(receive_nic, PACKET_NUM, get_packet, (u_char*)receive_nic);
+    pcap_loop(receive_nic, PACKET_NUM, get_packet, (u_char*)argv);
 
-    fprintf(stdout, "EELC-Receive: Ready to exit thread.\n");
+    fprintf(
+        stdout, 
+        "EELC-Receive: Last packet is received. Ready to exit thread.\n"
+    );
 
     pcap_close(receive_nic);
 
@@ -59,7 +62,8 @@ void* packets_receive(void* argv) {
 }
 
 void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* packet) {
-    pcap_t* receive_nic = (pcap_t*)arg;
+    // struct timeval* end_time_record = (struct timeval*)arg;
+    struct timespec* end_time_record = (struct timespec*)arg;
     struct ether_header* eth_header;
     u_char local_mac[6];
 
@@ -74,15 +78,38 @@ void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* pac
             return;
         }
     }
-    for (int i = 0; i < 6; i++) {
-        eth_header->ether_dhost[i] = eth_header->ether_shost[i];
-        eth_header->ether_shost[i] = local_mac[i];
-    }
-    if (pcap_inject(receive_nic, packet, pkthdr->caplen) == -1) {
-        fprintf(
-            stderr, 
-            "Error: EELC-Receive: pcap_inject(): send packet error\n"
-        );
+    if (ntohs(eth_header->ether_type) == ETHERTYPE_IP) {
+        const u_char* ip_header;
+        u_char protocol;
+        uint16_t packet_count;
+        ip_header = packet + ETHER_HEADER_LENGTH;
+        protocol = *(ip_header + 9);
+        if (protocol == IPPROTO_TCP) {
+            const u_char* tcp_header;
+            unsigned int ip_header_length;
+            ip_header_length = (*ip_header) & 0x0F;
+            ip_header_length = ip_header_length * 4;
+            tcp_header = ip_header + ip_header_length;
+            packet_count = ntohs(*((uint16_t*)(tcp_header + 18)));
+            // gettimeofday(&end_time_record[packet_count], NULL);
+            clock_gettime(CLOCK_REALTIME, &end_time_record[packet_count]);
+            if (packet_count % 1000 == 999) {
+                fprintf(
+                    stdout, 
+                    "EELC-Receive: %d packets(used for "
+                    "latency computing) has been received\n", 
+                    packet_count + 1
+                );
+            }
+            if (packet_count == TIME_RECORD_SIZE - 1) {
+                fprintf(
+                    stdout, 
+                    "EELC-Receive: Last packet is received."
+                    " Ready to exit thread.\n"
+                );
+                pthread_exit(NULL);
+            }
+        }
     }
     return;
 }
