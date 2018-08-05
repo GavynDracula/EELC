@@ -10,19 +10,21 @@
 int main(void) {
     int ret;
     void* status;
-    char nic_group_1[2][16];
-    char nic_group_2[2][16];
+    struct forward_thread_arg thread_1_arg;
+    struct forward_thread_arg thread_2_arg;
     pthread_t forward_thread_1;
     pthread_t forward_thread_2;
     cpu_set_t set;
 
-    sprintf(nic_group_1[0], "%s", FORWARD_NIC_1);
-    sprintf(nic_group_1[1], "%s", FORWARD_NIC_2);
-    sprintf(nic_group_2[0], "%s", FORWARD_NIC_2);
-    sprintf(nic_group_2[1], "%s", FORWARD_NIC_1);
+    sprintf(thread_1_arg.nic_group[0], "%s", FORWARD_NIC_1);
+    sprintf(thread_1_arg.nic_group[1], "%s", FORWARD_NIC_2);
+    sprintf(thread_1_arg.target_mac, "%s", TARGET_MAC_1);
+    sprintf(thread_2_arg.nic_group[0], "%s", FORWARD_NIC_2);
+    sprintf(thread_2_arg.nic_group[1], "%s", FORWARD_NIC_1);
+    sprintf(thread_2_arg.target_mac, "%s", TARGET_MAC_2);
 
     ret = pthread_create(
-        &forward_thread_1, NULL, &packets_forward, nic_group_1
+        &forward_thread_1, NULL, &packets_forward, &thread_1_arg
     );
     if (ret != 0) {
         fprintf(stderr, "Error: EELC-Main: Can't create Forward thread 1!");
@@ -30,7 +32,7 @@ int main(void) {
     }
 
     ret = pthread_create(
-        &forward_thread_2, NULL, &packets_forward, nic_group_2
+        &forward_thread_2, NULL, &packets_forward, &thread_2_arg
     );
     if (ret != 0) {
         fprintf(stderr, "Error: EELC-Main: Can't create Forward thread 2!");

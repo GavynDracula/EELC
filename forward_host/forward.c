@@ -11,7 +11,8 @@ void* packets_forward(void* argv) {
     char err_buf[PCAP_ERRBUF_SIZE];
     pcap_t* receive_nic;
     pcap_t* send_nic;
-    char (*nic_group)[16] = argv;
+    struct forward_thread_arg* thread_arg = (struct forward_thread_arg*)argv;
+    struct pcap_loop_arg func_arg;
 
     fprintf(stdout, "EELC-Forward: Thread is running...\n");
 
@@ -23,7 +24,7 @@ void* packets_forward(void* argv) {
         // pthread_exit(NULL);
     // }
 
-    receive_nic = pcap_create(nic_group[0], err_buf);
+    receive_nic = pcap_create(thread_arg->nic_group[0], err_buf);
     if (receive_nic == NULL) {
         fprintf(stderr, "Error: EELC-Forward: pcap_create(): %s\n", err_buf);
         pthread_exit(NULL);
@@ -51,7 +52,7 @@ void* packets_forward(void* argv) {
         pthread_exit(NULL);
     }
 
-    send_nic = pcap_create(nic_group[1], err_buf);
+    send_nic = pcap_create(thread_arg->nic_group[1], err_buf);
     if (send_nic == NULL) {
         fprintf(stderr, "Error: EELC-Forward: pcap_create(): %s\n", err_buf);
         pthread_exit(NULL);
@@ -79,7 +80,9 @@ void* packets_forward(void* argv) {
         pthread_exit(NULL);
     }
 
-    pcap_loop(receive_nic, PACKET_NUM, get_packet, (u_char*)send_nic);
+    func_arg.send_nic = send_nic;
+    func_arg.target_mac = thread_arg->target_mac;
+    pcap_loop(receive_nic, PACKET_NUM, get_packet, (u_char*)&func_arg);
 
     fprintf(stdout, "EELC-Forward: Ready to exit thread.\n");
 
@@ -90,30 +93,23 @@ void* packets_forward(void* argv) {
 }
 
 void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* packet) {
-    pcap_t* send_nic = (pcap_t*)arg;
+    struct pcap_loop_arg* func_arg = (struct pcap_loop_arg*)arg;
     struct ether_header* eth_header;
-    u_char target_mac_1[6];
-    u_char target_mac_2[6];
+    u_char target_mac[6];
     int i;
 
     eth_header = (struct ether_header*)packet;
     sscanf(
-        TARGET_MAC_1, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-        target_mac_1 + 5, target_mac_1 + 4, target_mac_1 + 3,
-        target_mac_1 + 2, target_mac_1 + 1, target_mac_1 + 0
-    );
-    sscanf(
-        TARGET_MAC_2, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
-        target_mac_2 + 5, target_mac_2 + 4, target_mac_2 + 3,
-        target_mac_2 + 2, target_mac_2 + 1, target_mac_2 + 0
+        func_arg->target_mac, "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+        target_mac + 5, target_mac + 4, target_mac + 3,
+        target_mac + 2, target_mac + 1, target_mac + 0
     );
     for (i = 0; i < 6; i++) {
-        if (eth_header->ether_dhost[i] != target_mac_1[i] && 
-            eth_header->ether_dhost[i] != target_mac_2[i]) {
+        if (eth_header->ether_dhost[i] != target_mac[i]) {
             return;
         }
     }
-    if (pcap_inject(send_nic, packet, pkthdr->caplen) == -1) {
+    if (pcap_inject(func_arg->send_nic, packet, pkthdr->caplen) == -1) {
         fprintf(
             stderr, 
             "Error: EELC-Receive: pcap_inject(): send packet error\n"

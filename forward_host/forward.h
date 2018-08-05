@@ -15,8 +15,8 @@
 #include <pthread.h>
 #include <sys/time.h>
 
-#define FORWARD_NIC_1 "enp4s0f0"
-#define FORWARD_NIC_2 "enp4s0f1"
+#define FORWARD_NIC_1 "enp2s0f0"
+#define FORWARD_NIC_2 "enp2s0f1"
 
 #define ETHER_HEADER_LENGTH 14
 
@@ -27,10 +27,20 @@
 
 #define PACKET_NUM -1
 
-#define TARGET_MAC_1 "68:91:d0:61:12:3a"
-#define TARGET_MAC_2 "68:91:d0:61:12:3b"
+#define TARGET_MAC_1 "00:1b:21:93:33:d9"
+#define TARGET_MAC_2 "00:1b:21:93:33:d8"
 
 #define TIME_RECORD_SIZE 10000
+
+struct forward_thread_arg {
+    char nic_group[2][16];
+    char target_mac[20];
+};
+
+struct pcap_loop_arg {
+    pcap_t* send_nic;
+    char* target_mac;
+};
 
 void* packets_forward(void* argv);
 void get_packet(u_char* arg, const struct pcap_pkthdr* pkthdr, const u_char* packet);
